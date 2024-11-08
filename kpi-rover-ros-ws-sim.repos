@@ -1,0 +1,6 @@
+repositories:
+    kpi-rover:
+        type: git
+        url: git@github.com:KPI-Rover/ros_sw.git
+        version: main
+    
