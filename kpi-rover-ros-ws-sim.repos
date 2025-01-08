@@ -4,3 +4,8 @@ repositories:
         url: git@github.com:KPI-Rover/ros_sw.git
         version: main
     
+    lidar-coin_d4a:
+        type: git
+        url: git@github.com:KPI-Rover/ros_cspc_lidar_coin_d4a.git
+        version: main
+    
