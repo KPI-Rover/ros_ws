@@ -1,4 +1,4 @@
-The vcstool is used to simplify packages instaletion.
+The vcstool is used to simplify packages installation.
 https://github.com/dirk-thomas/vcstool 
 
 1. Clone repository
