@@ -9,3 +9,7 @@ repositories:
         url: git@github.com:KPI-Rover/ros_cspc_lidar_coin_d4a.git
         version: main
     
+    ros_diff_drive_hardware:
+        type: git
+        url: git@github.com:KPI-Rover/ros_diff_drive_hardware.git
+        version: main
