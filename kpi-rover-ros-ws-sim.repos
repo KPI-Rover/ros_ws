@@ -11,5 +11,5 @@ repositories:
     
     ros_diff_drive_hardware:
         type: git
-        url: git@github.com:KPI-Rover/ros_diff_drive_hardware.git
+        url: git@github.com:KPI-Rover/ros_kpi_rover_hw.git
         version: main
