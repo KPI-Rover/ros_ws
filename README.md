@@ -1,53 +1,135 @@
-The vcstool is used to simplify package installation.
-https://github.com/dirk-thomas/vcstool
+# KPI Rover ROS2 Software
+<!-- The markdown-toc utilitity is used to generate the Table of Contents -->
+<!-- Installation: npm install -g markdown-toc -->
+<!-- Usage: markdown-toc -i README.md -->
+<!-- toc -->
+
+- [KPI Rover ROS2 Software](#kpi-rover-ros2-software)
+  - [Get Source Code](#get-source-code)
+  - [Build and Launch Simulation Using Docker](#build-and-launch-simulation-using-docker)
+  - [Build and Launch Simulation Without Docker](#build-and-launch-simulation-without-docker)
+  - [Build and Launch on RPI](#build-and-launch-on-rpi)
+  - [Other Notes](#other-notes)
+    - [Start Keyboard Control](#start-keyboard-control)
+    - [Launch CSPC Lidar Demo](#launch-cspc-lidar-demo)
+    - [Start DDS Server](#start-dds-server)
+    - [Launch in Docker when DDS is used](#launch-in-docker-when-dds-is-used)
+  - [TODO List](#todo-list)
+
+<!-- tocstop -->
 
 ## Get Source Code
 
-### Clone Repository
+**Clone Repository**
 ```bash
 git clone git@github.com:KPI-Rover/ros_ws.git
 cd ros_ws
 ```
 
-### Install Packages Using vcstool
+**Install Packages Using vcstool**
 ```bash
-vcs import src < kpi-rover-ros-ws-sim.repos
+vcs import src < kpi-rover.repos
 ```
+
+❗ **Important:** Run all next commands from the root of the ROS workspace (`ros_ws` folder) unless specified otherwise.
 
 ## Build and Launch Simulation Using Docker
 
-This is the preferred approach for working with the project.  
-All pull requests must be submitted with the source code built and executed using Docker.  
-CI integration based on this approach will be added soon.
+❗ **Important:**  All pull requests must include source code that has been built and executed using Docker.
+CI integration following this approach will be added soon.
 
-### Build Docker
+**Build Docker**
 ```bash
 docker build -t kpi-rover .
 ```
 
-### Build Project
+**Build Project**
 ```bash
 docker run --rm -it \
   --user $(id -u):$(id -g) \
   -v $(pwd):/workspace \
   -w /workspace \
   kpi-rover colcon build
-
-exit
 ```
 
-### Launch Simulation
+**Launch Simulation**
 
-#### Start DDS Server
+```bash
+docker run --rm -it \
+  --init \
+  --network=host \
+  --user $(id -u):$(id -g) \
+  -v $(pwd):/workspace \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v ~/.gz:/home/ubuntu/.gz \
+  -w /workspace \
+  -e ROS_DOMAIN_ID=1 \
+  -e GZ_PARTITION=1 \
+  kpi-rover \
+  bash -c "
+    source /opt/ros/jazzy/setup.bash \
+    && source install/setup.bash \
+    && ros2 launch apricotka-robot-car launch_sim.launch.py"
+```
+
+## Build and Launch Simulation Without Docker
+
+Gazebo runs very slowly in Docker. Because of this, we need to run the project locally to make it work faster.
+
+To avoid problems with missing packages, always add new packages to the package.xml file. This helps to install them easily using the rosdep tool.
+
+**Install ROS Dependencies**
+```bash
+rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+```
+
+**Source ROS2 (If Not Added to `.bashrc`)**
+```bash
+source /opt/ros/jazzy/setup.bash
+```
+
+**Build Project**
+```bash
+colcon build
+```
+
+**Launch Simulation**
+
+```bash
+source install/setup.bash
+ros2 launch apricotka-robot-car launch_sim.launch.py
+```
+
+## Build and Launch on RPI
+TBD
+
+## Other Notes
+This section holds temporary, unorganized notes.
+
+### Start Keyboard Control
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+--ros-args \
+-r /cmd_vel:=/diff_drive_base_controller/cmd_vel \
+-p stamped:=True \
+-p frame_id:=base_link
+```
+
+### Launch CSPC Lidar Demo
+```bash
+ros2 launch cspc_lidar demo.launch.py
+```
+
+### Start DDS Server
 A DDS (Data Distribution Service) server facilitates real-time data exchange between distributed ROS2 nodes over the network. Using a DDS server ensures seamless communication between components, particularly when a PC has multiple network interfaces. It helps in optimizing discovery mechanisms and maintaining robust connectivity.
 
-**Terminal 1**
 ```bash
 fastdds discovery -i 0
 ```
 
-#### Launch no UI Nodes
-**Terminal 2**
+### Launch in Docker when DDS is used
 ```bash
 docker run --rm -it \
   --init \
@@ -65,90 +147,8 @@ docker run --rm -it \
     && source install/setup.bash \
     && ros2 launch apricotka-robot-car launch_sim.launch.py"
 ```
-- `--rm`: Removes the container once it exits.
-- `-it`: Runs interactively with a terminal.
-- `--init`: Ensures proper handling of child processes.
-- `--user $(id -u):$(id -g)`: Runs the container as the current user.
-- `-v $(pwd):/workspace`: Mounts the current directory to `/workspace` inside the container.
-- `-w /workspace`: Sets the working directory inside the container.
-- Environment variables:
-  - `ROS_DISCOVERY_SERVER`: Specifies the DDS discovery server's address.
-  - `ROS_DOMAIN_ID`: Defines the ROS2 domain to avoid conflicts.
-  - `IGN_DISCOVERY_URI`: Specifies the Gazebo discovery server.
-  - `FASTRTPS_DEFAULT_PROFILES_FILE`: Points to the Fast RTPS configuration file.
-  - `GZ_PARTITION`: The GZ_PARTITION environment variable is used in Gazebo (GZ) to define a logical partition for simulations. It allows multiple instances of Gazebo to run independently on the same network, preventing interference between different simulations.
 
-#### Launch Gazebo UI Client
-This step also launches the joystick node for simplicity. In the future, the joystick node will be moved inside Docker.
-
-**Terminal 3**
-```bash
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
-export ROS_DISCOVERY_SERVER=172.17.0.1:11811
-export ROS_DOMAIN_ID=1
-export IGN_DISCOVERY_URI=tcp://172.17.0.1:11811
-export GZ_PARTITION=1
-export FASTRTPS_DEFAULT_PROFILES_FILE=$(pwd)/super_client_cfg_file.xml
-ros2 launch apricotka-robot-car launch_gzui.launch.py
-```
-- `ROS_DISCOVERY_SERVER=172.17.0.1:11811`: Specifies the DDS discovery server's IP and port.
-- `ROS_DOMAIN_ID=1`: Defines the ROS2 domain ID.
-- `IGN_DISCOVERY_URI=tcp://172.17.0.1:11811`: Specifies the Gazebo discovery service.
-- `GZ_PARTITION=1`: Defines the Gazebo partition.
-- `FASTRTPS_DEFAULT_PROFILES_FILE`: Points to the Fast RTPS configuration file.
-
-`172.17.0.1` is the default gateway IP for Docker bridge networks, ensuring communication between the host and Docker containers.
-
-## Build and Launch Simulation Without Docker
-This approach is **not recommended**.
-
-Running without Docker increases complexity due to manual dependency management, potential system conflicts, and inconsistent runtime environments. Docker ensures a reproducible and isolated development environment.
-
-### Install ROS Dependencies
-```bash
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
-```
-
-### Source ROS2 (If Not Added to `.bashrc`)
-```bash
-source /opt/ros/jazzy/setup.bash
-```
-
-### Build Source Code
-```bash
-colcon build
-```
-
-### Launch Simulation
-
-**Terminal 1**
-```bash
-source install/setup.bash
-ros2 launch apricotka-robot-car launch_sim.launch.py
-```
-
-**Terminal 2**
-```bash
-source install/setup.bash
-ros2 launch apricotka-robot-car launch_gzui.launch.py
-```
-
-## Other Notes
-This section holds temporary, unorganized notes.
-
-### Start Keyboard Control (New Terminal Window)
-```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard \
---ros-args \
--r /cmd_vel:=/diff_drive_base_controller/cmd_vel \
--p stamped:=True \
--p frame_id:=base_link
-```
-
-### Launch CSPC Lidar Demo
-```bash
-ros2 launch cspc_lidar demo.launch.py
-```
-
+## TODO List
+- [ ] Add entrypoint to surce source install/setup.bash
+- [ ] Create Docker container for RPI
+- [ ] How to use gamepad
