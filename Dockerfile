@@ -1,9 +1,10 @@
 ARG ROS_DISTRO=jazzy
 
-FROM osrf/ros:${ROS_DISTRO}-desktop
+FROM osrf/ros:${ROS_DISTRO}-desktop-full
 
 # Install dependencies for rosdep and sudo
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
     python3-rosdep \
     net-tools \
     iputils-ping \
