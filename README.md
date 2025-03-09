@@ -70,7 +70,7 @@ docker run --rm -it \
   bash -c "
     source /opt/ros/jazzy/setup.bash \
     && source install/setup.bash \
-    && ros2 launch apricotka-robot-car launch_sim.launch.py"
+    && ros2 launch kpi_rover launch_sim.launch.py"
 ```
 
 ## Build and Launch Simulation Without Docker
@@ -99,7 +99,7 @@ colcon build
 
 ```bash
 source install/setup.bash
-ros2 launch apricotka-robot-car launch_sim.launch.py
+ros2 launch kpi_rover launch_sim.launch.py
 ```
 
 ## Build and Launch on RPI
