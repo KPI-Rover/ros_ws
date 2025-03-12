@@ -1,0 +1,18 @@
+ARG ROS_DISTRO=jazzy
+
+FROM ros:${ROS_DISTRO}
+
+# Install dependencies for rosdep and sudo
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
+    python3-rosdep \
+    net-tools \
+    iputils-ping \
+    nano \
+    v4l-utils
+
+WORKDIR /workspace
+
+COPY src /workspace/src
+RUN rosdep install --from-paths /workspace/src --ignore-src -r -y
+RUN rm -rf /workspace/src
