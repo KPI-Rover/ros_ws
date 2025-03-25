@@ -103,7 +103,99 @@ ros2 launch kpi_rover launch_sim.launch.py
 ```
 
 ## Build and Launch on RPI
-TBD
+
+Note: RPI, BBB and PC should be connected to the common network.
+
+### To set up automated startup on power-on(RPI):
+
+**Build Docker**
+
+```bash
+docker build -t kpi-rover . -f DockerfileRPI
+```
+
+**Build Project**
+```bash
+docker run --rm -it \
+  --user $(id -u):$(id -g) \
+  -v $(pwd):/workspace \
+  -w /workspace \
+  kpi-rover colcon build
+```
+
+**Create system services**
+
+1. For DDS server to establish communication between nodes through the network
+- Create /etc/systemd/system/fastdds.service system service file with the following contents. You need sudo permission to do this.
+
+```
+[Unit]
+After=network-online.target
+Description=DDS server for ROS2 node comunication through network
+
+[Service]
+User=vik
+Group=vik
+ExecStart=fastdds discovery -i 0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
+
+```
+- Enable and start the service.
+
+```bash
+sudo systemctl enable fastdds.service
+sudo systemctl start fastdds.service
+```
+
+
+2. For running ROS nodes
+- Create /etc/systemd/system/kpi-rover.service system service file with the following contents. You need sudo permission to do this.
+
+```
+[Unit]
+After=network-online.target
+After=docker.service
+Requires=docker.service
+After=fastdds.service
+Description=ROS2 autonomous robot services
+
+[Service]
+User=<user>
+Group=<group>
+ExecStart=docker run --rm --name=kpi_rover --user root  --init  --network=host -v </path/to/ros_ws>:/workspace   -w /workspace   -e ROS_DISCOVERY_SERVER=172.17.0.1:11811   -e ROS_DOMAIN_ID=1 -e FASTRTPS_DEFAULT_PROFILES_FILE=/workspace/super_client_cfg_file.xml --device=/dev/sc_mini --device=/dev/video0 kpi-rover bash -c 'source /opt/ros/jazzy/setup.bash \
+&& source install/setup.bash \
+&& ros2 launch kpi_rover launch_irl.launch.py ecu_ip:=<BBB ip>'
+TimeoutStartSec=0
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=default.target
+
+```
+
+- Enable and start the service.
+
+```bash
+sudo systemctl enable kpi-rover.service
+sudo systemctl start kpi-rover.service
+```
+
+
+
+### To run visualization on your host machine:
+```bash
+export ROS_DISCOVERY_SERVER=<ip of the RPI>:11811
+```
+```bash
+cd ~/ros_ws
+source install/setup.bash
+ros2 launch kpi_rover launch_visualization.launch.py 
+```
 
 ## Other Notes
 This section holds temporary, unorganized notes.
