@@ -111,6 +111,7 @@ Note: RPI, BBB and PC should be connected to the common network.
 **Build Docker**
 
 ```bash
+cd ~/ros_ws
 docker build -t kpi-rover . -f DockerfileRPI
 ```
 
@@ -166,9 +167,7 @@ Description=ROS2 autonomous robot services
 [Service]
 User=<user>
 Group=<group>
-ExecStart=docker run --rm --name=kpi_rover --user root  --init  --network=host -v </path/to/ros_ws>:/workspace   -w /workspace   -e ROS_DISCOVERY_SERVER=172.17.0.1:11811   -e ROS_DOMAIN_ID=1 -e FASTRTPS_DEFAULT_PROFILES_FILE=/workspace/super_client_cfg_file.xml --device=/dev/sc_mini --device=/dev/video0 kpi-rover bash -c 'source /opt/ros/jazzy/setup.bash \
-&& source install/setup.bash \
-&& ros2 launch kpi_rover launch_irl.launch.py ecu_ip:=<BBB ip>'
+ExecStart= bash -c "${HOME}/ros_ws/run.sh -b <bbb_ip>"
 TimeoutStartSec=0
 Restart=always
 RestartSec=2s
