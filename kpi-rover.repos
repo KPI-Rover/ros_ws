@@ -8,3 +8,8 @@ repositories:
         type: git
         url: git@github.com:KPI-Rover/ros_cspc_lidar_coin_d4a.git
         version: main
+
+    external/lidar_rpilidar:
+        type: git 
+        url: git@github.com:Slamtec/rplidar_ros.git
+        version: ros2
