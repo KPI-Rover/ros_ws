@@ -108,6 +108,13 @@ Note: RPI, BBB and PC should be connected to the common network.
 
 ### To set up automated startup on power-on(RPI):
 
+**Install udev rules for the lidar**
+
+```bash
+cd ~/ros_ws/src/lidar_coin_d4a
+sudo cp sc_mini.rules /etc/udev/rules.d
+```
+
 **Build Docker**
 
 ```bash
