@@ -40,7 +40,7 @@ CI integration following this approach will be added soon.
 
 **Build Docker**
 ```bash
-docker build -t kpi-rover .
+docker build -t kpi-rover . -f docker/Dockerfile.sim
 ```
 
 **Build Project**
@@ -119,7 +119,7 @@ sudo cp sc_mini.rules /etc/udev/rules.d
 
 ```bash
 cd ~/ros_ws
-docker build -t kpi-rover . -f DockerfileRPI
+docker build -t kpi-rover . -f docker/Dockerfile.rpi
 ```
 
 **Build Project**
