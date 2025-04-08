@@ -1,0 +1,8 @@
+# Rules for assigning consistent device names for KPI Rover devices.
+# Note: Only one LIDAR device can be connected at a time.
+
+# Rule for RPLIDAR
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="lidar"
+
+# Rule for COIN D4A
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE:="0666", SYMLINK+="lidar"
