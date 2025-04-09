@@ -47,11 +47,9 @@ docker run --rm --name=kpi_rover --init \
  -v $(pwd):/workspace \
  -w /workspace \
  -e FASTRTPS_DEFAULT_PROFILES_FILE=/workspace/super_client_cfg_file.xml \
+ -e ROS_DOMAIN_ID=1 \
  --device=/dev/lidar \
  kpi-rover bash -c "./launch_rpi.sh"
-
-docker stop /kpi_rover
-
 
 # -c "source /opt/ros/jazzy/setup.bash \
 # && source install/setup.bash \

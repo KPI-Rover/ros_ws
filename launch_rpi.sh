@@ -7,4 +7,4 @@ source install/setup.bash
 
 fastdds discovery -i 0 &
 
-ros2 launch rplidar_ros rplidar_c1_launch.py serial_port:=/dev/lidar
+ros2 launch kpi_rover launch_irl.launch.py
