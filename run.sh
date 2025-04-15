@@ -8,6 +8,7 @@ Run kpi_rover on real hardware.
 Options:
         -w      specify path to ros_ws folder
         -b	specify BBB IP-address
+        -u      specify UDP port to listen IMU data to
         -h      print usage
 EOH
 }
@@ -16,6 +17,7 @@ EOH
 
 ws_path="$HOME/ros_ws"
 bbb_ip=""
+udp_port_opt=""
 
 
 while getopts 'w:b:h' opt
@@ -24,6 +26,7 @@ do
                 h) show_help; exit 0;;
                 w) ws_path=$OPTARG;;
                 b) bbb_ip=$OPTARG;;
+                u) udp_port="udp_port:=$OPTARG";;
         esac
 done
 
@@ -41,4 +44,4 @@ docker run --rm --name=kpi_rover --user root --init --network=host \
  -e FASTRTPS_DEFAULT_PROFILES_FILE=/workspace/super_client_cfg_file.xml \
  --device=/dev/sc_mini --device=/dev/video0 kpi-rover bash -c "source /opt/ros/jazzy/setup.bash \
 && source install/setup.bash \
-&& ros2 launch kpi_rover launch_irl.launch.py ecu_ip:=$bbb_ip"
+&& ros2 launch kpi_rover launch_irl.launch.py ecu_ip:=$bbb_ip $udp_port_opt"
