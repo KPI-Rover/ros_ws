@@ -42,6 +42,9 @@ docker run --rm --name=kpi_rover --user root --init --network=host \
  -v $ws_path:/workspace -w /workspace \
  -e ROS_DISCOVERY_SERVER=172.17.0.1:11811 -e ROS_DOMAIN_ID=1 \
  -e FASTRTPS_DEFAULT_PROFILES_FILE=/workspace/super_client_cfg_file.xml \
+ --cap-add=sys_nice \
+ --ulimit rtprio=99 \
+ --ulimit memlock=-1 \
  --device=/dev/sc_mini --device=/dev/video0 kpi-rover bash -c "source /opt/ros/jazzy/setup.bash \
 && source install/setup.bash \
 && ros2 launch kpi_rover launch_irl.launch.py ecu_ip:=$bbb_ip $udp_port_opt"
