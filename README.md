@@ -250,3 +250,40 @@ docker run --rm -it \
 - [ ] Add entrypoint to surce source install/setup.bash
 - [ ] Create Docker container for RPI
 - [ ] How to use gamepad
+
+
+## Setup RPI
+
+### Update bootloader
+
+Mandatory because there is bug: https://github.com/raspberrypi/rpi-eeprom/issues/514
+
+```
+sudo apt update
+sudo apt install rpi-eeprom
+
+sudo rpi-eeprom-update -a
+```
+
+### Enable UARTs
+**Enable uart0 and uart2**
+```bash
+ sudo nano /boot/firmware/config.txt
+```
+Add the following line:
+```
+[pi5]
+dtoverlay=uart0-pi5
+dtoverlay=uart2-pi5
+
+```
+
+**Disable serial console on uart0 interface.**
+```
+sudo nano /boot/firmware/cmdline.txt
+```
+
+Remove the following text from file
+```
+console=serial0,115200
+```
