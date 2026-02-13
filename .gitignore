@@ -4,4 +4,7 @@
 /src/
 .colcon/
 .vscode/
+.env
 rviz.rviz
+.docker_home/
+.ros/

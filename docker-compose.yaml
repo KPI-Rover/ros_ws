@@ -1,0 +1,56 @@
+services:
+  pc:
+    image: kpi-rover-pc
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sim
+    container_name: kpi-rover-pc
+    network_mode: host
+    ipc: host
+    privileged: true
+    user: "${UID}:${GID}"
+    group_add:
+      - dialout
+    environment:
+      - DISPLAY=${DISPLAY}
+      - ROS_DOMAIN_ID=1
+      - HOME=/workspace/.docker_home
+      - XDG_CACHE_HOME=/workspace/.docker_home/.cache
+      - XDG_DATA_HOME=/workspace/.docker_home/.local
+      - XDG_CONFIG_HOME=/workspace/.docker_home/.config
+      - ZELLIJ_CONFIG_FILE=/workspace/.zellij/config.kdl
+    volumes:
+      - .:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    working_dir: /workspace
+    devices:
+      - /dev/dri:/dev/dri
+    tty: true
+    stdin_open: true
+
+  hw:
+    image: kpi-rover-hw
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.rpi
+    container_name: kpi-rover-hw
+    network_mode: host
+    privileged: true
+    init: true
+    user: "${UID}:${GID}"
+    group_add:
+      - dialout
+    environment:
+      - ROS_DOMAIN_ID=1
+      - HOME=/workspace/.docker_home
+      - XDG_CACHE_HOME=/workspace/.docker_home/.cache
+      - XDG_DATA_HOME=/workspace/.docker_home/.local
+      - XDG_CONFIG_HOME=/workspace/.docker_home/.config
+      - ZELLIJ_CONFIG_FILE=/workspace/.zellij/config.kdl
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    devices:
+      - /dev/ttyAMA2:/dev/ttyAMA2
+    tty: true
+    stdin_open: true

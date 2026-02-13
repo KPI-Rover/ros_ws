@@ -40,37 +40,18 @@ CI integration following this approach will be added soon.
 
 **Build Docker**
 ```bash
-docker build -t kpi-rover . -f docker/Dockerfile.sim
+docker compose build
 ```
 
 **Build Project**
 ```bash
-docker run --rm -it \
-  --user $(id -u):$(id -g) \
-  -v $(pwd):/workspace \
-  -w /workspace \
-  kpi-rover colcon build
+docker compose run builder
 ```
 
 **Launch Simulation**
 
 ```bash
-docker run --rm -it \
-  --init \
-  --network=host \
-  --user $(id -u):$(id -g) \
-  -v $(pwd):/workspace \
-  -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v ~/.gz:/home/ubuntu/.gz \
-  -w /workspace \
-  -e ROS_DOMAIN_ID=1 \
-  -e GZ_PARTITION=1 \
-  kpi-rover \
-  bash -c "
-    source /opt/ros/jazzy/setup.bash \
-    && source install/setup.bash \
-    && ros2 launch kpi_rover launch_sim.launch.py"
+docker compose up sim
 ```
 
 ## Build and Launch Simulation Without Docker
@@ -137,7 +118,6 @@ Remove the following text from file
 ```
 console=serial0,115200
 ```
-
 ### Install udev rules for the lidar**
 ```bash
 cd ~/ros_ws/src/lidar_coin_d4a
@@ -146,7 +126,7 @@ sudo cp sc_mini.rules /etc/udev/rules.d
 
 ## Build and Launch on RPI
 
-> ❗ **Important:** RPI, BBB and PC should be connected to the same network.
+> ❗ **Important:** RPI and PC should be connected to the same network.
 
 > ℹ️ **Note:** Currently we build Docker images and software right on the RPI. In the future, we are planning to build Docker images for the RPI on a host and push them to the RPI.
 
@@ -162,22 +142,30 @@ cd ros_ws
 ```bash
 vcs import src < kpi-rover.repos
 ```
+**Save environment variables for docker compose**
+```bash
+echo "UID=$(id -u)" > .env
+echo "GID=$(id -g)" >> .env
+```
 
 **Build Docker image**
-
 ```bash
-cd ~/ros_ws
-docker build -t kpi-rover . -f docker/Dockerfile.rpi
+docker compose build hw
 ```
 
-**Build Project**
+**Start Docker container**
 ```bash
-./build.sh
+docker compose run --rm hw
 ```
+> ℹ️ **Note:** All next commands perform inside Docker container.
 
-**Launch**
+**Build and lunch ROS2 project**
 ```bash
-./run-hw.sh
+colcon build
+
+source install/setup.bash
+
+ros2 launch kpi_rover launch_hw.launch.py
 ```
 
 ### On PC
@@ -191,32 +179,34 @@ cd ros_ws
 ```bash
 vcs import src < kpi-rover.repos
 ```
+**Save environment variables for docker compose**
+```bash
+echo "UID=$(id -u)" > .env
+echo "GID=$(id -g)" >> .env
+```
 
 **Build Docker image**
 ```bash
-docker build -t kpi-rover . -f docker/Dockerfile.sim
+docker compose build pc
 ```
 
-**Build Project**
+**Start Docker container**
 ```bash
-./build.sh
+docker compose run --rm pc
 ```
 
 **Lunch Rviz in Docker**
 ```bash
-./run-pc.sh
+rviz2
 ```
 
-**Join running Docker container**
-```bash
-./run-join.sh
-```
+
 
 **Start Keyboard Control**
 ```bash
 ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 --ros-args \
--r /cmd_vel:=/diff_drive_base_controller/cmd_vel \
+-r /cmd_vel:=/diff_drive_controller/cmd_vel \
 -p stamped:=True \
 -p frame_id:=base_link
 ```

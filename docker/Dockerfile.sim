@@ -3,16 +3,45 @@ ARG ROS_DISTRO=jazzy
 FROM osrf/ros:${ROS_DISTRO}-desktop-full
 
 # Install dependencies for rosdep and sudo
-RUN apt-get update && apt-get upgrade -y && \
+RUN apt-get update && \
     apt-get install -y \
     python3-rosdep \
     net-tools \
     iputils-ping \
     nano \
-    vim
+    vim \
+    curl \
+    htop
 
 WORKDIR /workspace
 
+# Install ROS dependencies for the workspace
 COPY src /workspace/src
 RUN rosdep install --from-paths /workspace/src --ignore-src -r -y
 RUN rm -rf /workspace/src
+
+# Download and install Zellij binary
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then ZELLIJ_ARCH="x86_64-unknown-linux-musl"; \
+    elif [ "$ARCH" = "aarch64" ]; then ZELLIJ_ARCH="aarch64-unknown-linux-musl"; \
+    else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
+    curl -L "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${ZELLIJ_ARCH}.tar.gz" | tar xz -C /usr/bin
+
+
+# GLOBAL SYSTEM-WIDE SETUP
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /etc/bash.bashrc && \
+    echo "export RCUTILS_COLORIZED_OUTPUT=1" >> /etc/bash.bashrc && \
+    echo "alias ls='ls --color=auto'" >> /etc/bash.bashrc && \
+    echo "alias ll='ls -alF'" >> /etc/bash.bashrc && \
+    echo "export PS1='\[\e[32m\][docker:desktop]\[\e[m\]:\[\e[34m\]\w\[\e[m\]# '" >> /etc/bash.bashrc && \
+    echo "export PROMPT_COMMAND='PS1=\"\[\e[32m\][docker:desktop]\[\e[m\]:\[\e[34m\]\w\[\e[m\]# \"'" >> /etc/bash.bashrc
+
+# Enable color support and terminal features
+ENV TERM=xterm-256color
+ENV FORCE_COLOR=1
+ENV SHELL=/bin/bash
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Set the default command to start Zellij
+ENTRYPOINT ["zellij"]
