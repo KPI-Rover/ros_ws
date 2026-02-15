@@ -22,6 +22,8 @@ services:
     volumes:
       - .:/workspace
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     working_dir: /workspace
     devices:
       - /dev/dri:/dev/dri
@@ -49,6 +51,8 @@ services:
       - ZELLIJ_CONFIG_FILE=/workspace/.zellij/config.kdl
     volumes:
       - .:/workspace
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     working_dir: /workspace
     devices:
       - /dev/ttyAMA2:/dev/ttyAMA2
