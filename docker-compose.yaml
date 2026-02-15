@@ -52,5 +52,6 @@ services:
     working_dir: /workspace
     devices:
       - /dev/ttyAMA2:/dev/ttyAMA2
+      - /dev/ttyUSB0:/dev/lidar
     tty: true
     stdin_open: true
