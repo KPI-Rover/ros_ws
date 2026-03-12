@@ -165,7 +165,7 @@ colcon build
 
 source install/setup.bash
 
-ros2 launch kpi_rover launch_hw.launch.py
+ros2 launch kpi_rover_bringup robot.launch.py
 ```
 
 ### On PC
@@ -195,14 +195,20 @@ docker compose build pc
 docker compose run --rm pc
 ```
 
-**Lunch Rviz in Docker**
+**Build**
 ```bash
-rviz2
+colcon build
+
+source install/setup.bash
 ```
 
-
+**Lunch Rviz in Docker**
+```bash
+ ros2 launch kpi_rover_bringup rviz.launch.py
+```
 
 **Start Keyboard Control**
+
 ```bash
 ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 --ros-args \
@@ -210,7 +216,8 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
 -p stamped:=True \
 -p frame_id:=base_link
 ```
- [TODO] : How to use gamepad
 
- 
- ros2 run tf2_tools view_frames
+## TODO
+- [ ] How to use gamepad
+- [ ] ros2 run tf2_tools view_frames
+
